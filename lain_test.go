@@ -130,6 +130,8 @@ func TestHelloWorld(tst *testing.T) {
 
 	fmt.Println("CHIPER_TEXT : ", cp1, cp2, plainA, plainB)
 
+	fmt.Println("RECOVER", binary.BigEndian.Uint32(cp1), binary.BigEndian.Uint32(cp2))
+
 	// decryption
 
 	chiperA := plainA
@@ -173,8 +175,15 @@ func TestRc5(t *testing.T) {
 
 	cobaRC5 := rc5.NewRC532(&config)
 
-	fmt.Println(cobaRC5.GetExpandedKeys())
+	//fmt.Println(cobaRC5.GetExpandedKeys())
 
-	chiper := cobaRC5.Encrypt([]byte("alfiann\n"))
-	fmt.Println(chiper)
+	//chiper := cobaRC5.EncryptBlock([]byte("alfiann\n"))
+	//fmt.Println("CHIPER_AWAL", chiper)
+
+	chiper2 := cobaRC5.Encrypt([]byte("mabook air 2020 apple silicon"))
+
+	fmt.Println(chiper2)
+
+	decrypted := cobaRC5.Decrypt(chiper2)
+	fmt.Println("DECRYPTED", string(decrypted), "$$")
 }
