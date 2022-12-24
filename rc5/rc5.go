@@ -1,6 +1,11 @@
 package rc5
 
-import "math"
+import (
+	"encoding/binary"
+	"fmt"
+	"math"
+	"math/big"
+)
 
 var (
 	w    = 32                                    // word plaintext size is 32 bit or 4 byte each (8 byte)
@@ -19,7 +24,7 @@ func modulo(a, b int) int {
 }
 
 func shiftLeft(val, n int) int {
-	n = modulo(n, 2)
+	n = modulo(n, w)
 	return ((val << n) & mask) | ((val & mask) >> (w - n))
 }
 
@@ -87,4 +92,29 @@ func NewRC532(config *RC5SimpleConfig) *RC5 {
 
 func (this *RC5) GetExpandedKeys() []int {
 	return this.S
+}
+
+func (this *RC5) Encrypt(plainText []byte) (chiper []byte) {
+	A := int(binary.LittleEndian.Uint32([]byte(plainText[:4])))
+
+	B := int(binary.LittleEndian.Uint32([]byte(plainText[4:])))
+
+	fmt.Println(plainText[:4], []byte(plainText[:4]), A)
+	fmt.Println(plainText[4:], []byte(plainText[4:]), B)
+
+	A = modulo((A + this.S[0]), mod)
+
+	B = modulo((B + this.S[1]), mod)
+
+	for i := 1; i <= this.r; i++ {
+		A = modulo((shiftLeft(A^B, B) + this.S[2*i]), mod)
+		B = modulo((shiftLeft(B^A, A) + this.S[2*i+1]), mod)
+	}
+
+	cp1 := big.NewInt(int64(A)).Bytes()
+	cp2 := big.NewInt(int64(B)).Bytes()
+
+	fmt.Println("CHIPER_TEXT : ", cp1, cp2)
+
+	return
 }

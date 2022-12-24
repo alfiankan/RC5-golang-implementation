@@ -46,6 +46,7 @@ func IntToByteArray(num int64, size int) []byte {
 func TestHelloWorld(tst *testing.T) {
 
 	key := []byte("2023Makmur\n")
+	fmt.Println("Key: ", key)
 	plainText := "alfiann\n"
 	// calculate bits
 	bits := len(plainText) * 8
@@ -78,6 +79,7 @@ func TestHelloWorld(tst *testing.T) {
 	q := 0x9e3779b9
 
 	t := 2 * (r + 1)
+	fmt.Println("t", t)
 
 	S := make([]int, t)
 
@@ -103,8 +105,7 @@ func TestHelloWorld(tst *testing.T) {
 
 	}
 
-	fmt.Println(S)
-	fmt.Println(L)
+	fmt.Println("S ==> ", S)
 
 	// encryption
 
@@ -174,4 +175,6 @@ func TestRc5(t *testing.T) {
 
 	fmt.Println(cobaRC5.GetExpandedKeys())
 
+	chiper := cobaRC5.Encrypt([]byte("alfiann\n"))
+	fmt.Println(chiper)
 }
