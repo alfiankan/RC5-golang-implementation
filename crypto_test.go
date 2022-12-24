@@ -1,120 +1,69 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
+
+	"github.com/alfiankan/rc5/rc5"
+	"github.com/stretchr/testify/assert"
 )
 
-/*
- */
+func BenchmarkRC5Decrypt(b *testing.B) {
+	for i := 0; i < b.N; i++ {
 
-const (
-	w = 32
-	r = 12
-	b = 16
-	c = 4
-	t = 26
-	p = 0xb7e15163
-	q = 0x9e3779b9
-)
+		cobaRC5 := rc5.NewRC532(&rc5.RC5SimpleConfig{
+			Key:   []byte("CryptoClassUMS2022"),
+			Round: 12,
+		})
 
-var S [t]int
+		chiper2 := cobaRC5.Encrypt([]byte("Happy New Year Eve 2023"))
 
-func ROTL(x, y int) int {
-	return x<<(y&(w-1)) | x>>(w-(y&(w-1)))
+		assert.Equal(b, "a2ORTDmgFTMVXiziosxt+IxH1SNFqriEVFV+5kFLuKI=", base64.StdEncoding.EncodeToString(chiper2))
+
+	}
 }
 
-func Encrypt(plainText []int, chiperText *[]int) {
+func TestRC5Encrypt(t *testing.T) {
 
-	A := plainText[0] + S[0]
-	B := plainText[1] + S[1]
+	cobaRC5 := rc5.NewRC532(&rc5.RC5SimpleConfig{
+		Key:   []byte("CryptoClassUMS2022"),
+		Round: 12,
+	})
 
-	for i := 0; i < r; i++ {
+	chiper2 := cobaRC5.Encrypt([]byte("Happy New Year Eve 2023"))
 
-		A = ROTL(A^B, B) + S[2*i]
-		B = ROTL(B^A, A) + S[2*i+1]
+	fmt.Println(chiper2)
 
-	}
+	readableChiper := base64.StdEncoding.EncodeToString(chiper2)
 
-	fmt.Println("==========")
-	fmt.Println(A, B)
+	fmt.Println(readableChiper)
 
-	for k := 0; k < w; k += 8 {
-		fmt.Printf("%x", (A>>k)&0xff)
-	}
-	fmt.Println("=====")
-	for k := 0; k < w; k += 8 {
-		fmt.Printf("%x", (B>>k)&0xff)
-	}
+	assert.Equal(t, "a2ORTDmgFTMVXiziosxt+IxH1SNFqriEVFV+5kFLuKI=", readableChiper)
+
+	byteChiper, err := base64.StdEncoding.DecodeString("a2ORTDmgFTMVXiziosxt+IxH1SNFqriEVFV+5kFLuKI=")
+	assert.Nil(t, err)
+
+	decrypted := cobaRC5.Decrypt(byteChiper)
+
+	assert.Equal(t, "Happy New Year Eve 2023", string(decrypted))
 
 }
 
-func Decrypt(chiperText []int) {
+func TestRC5Decrypt(t *testing.T) {
 
-	A := chiperText[0]
-	B := chiperText[1]
+	cobaRC5 := rc5.NewRC532(&rc5.RC5SimpleConfig{
+		Key:   []byte("CryptoClassUMS2022"),
+		Round: 12,
+	})
 
-	for i := r; i > 0; i-- {
-
-		if A < 0 {
-			B = ((B - S[2*i+1]) >> 0) ^ A
-		} else {
-			B = ((B - S[2*i+1]) >> A) ^ A
-		}
-
-		if B < 0 {
-			A = ((A - S[2*i]) >> 0) ^ B
-		} else {
-			A = ((A - S[2*i]) >> B) ^ B
-		}
-
+	byteChiper, err := base64.StdEncoding.DecodeString("a2ORTDmgFTMVXiziosxt+IxH1SNFqriEVFV+5kFLuKI=")
+	if err != nil {
+		panic(err)
 	}
 
-	pt := []int{}
-	pt[0] = A - S[0]
-	pt[1] = B - S[1]
+	decrypted := cobaRC5.Decrypt(byteChiper)
+	fmt.Println("DECRYPTED", string(decrypted))
+	assert.Equal(t, "Happy New Year Eve 2023", string(decrypted))
 
-	fmt.Println(pt)
-}
-
-func Setup(K []int) {
-
-	var i, j, k int
-
-	u := w / 8
-
-	var A, B int
-
-	var L [c]int
-
-	L[c-1] = 0
-	for i := (b - 1); i != -1; i-- {
-		L[i/u] = (L[i/u] << 8) + K[i]
-	}
-
-	S[0] = p
-	for k = 1; k < 3*t; k++ {
-
-		S[i] = ROTL(S[i]+(A+B), 3)
-		A = S[i]
-
-		L[j] = ROTL(L[j]+(A+B), A+B)
-
-		i = (i + 1) % t
-		j = (j + 1) % c
-	}
-
-}
-
-func TestCrypto(tst *testing.T) {
-	//	key := []byte{0x52, 0x69, 0xF1, 0x49, 0xD4, 0x1B, 0xA0, 0x15, 0x24, 0x97, 0x57, 0x4D, 0x7F, 0x15, 0x31, 0x25}
-	// plain = 650178B284D197CC
-	fmt.Println([]byte{0x65, 0x01, 0x78, 0xB2, 0x84, 0xD1, 0x97, 0xCC})
-	Setup([]int{82, 105, 241, 73, 212, 27, 160, 21, 36, 151, 87, 77, 127, 21, 49, 37})
-	fmt.Println(S)
-
-	var chiper []int
-	Encrypt([]int{101, 1, 120, 178, 132, 209, 151, 204}, &chiper)
-
-	//Decrypt([]int{-8299725257517854719, 1945161710708403300})
 }

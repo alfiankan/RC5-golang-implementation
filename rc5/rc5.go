@@ -156,10 +156,8 @@ func (this *RC5) Encrypt(plainText []byte) (chiperText []byte) {
 }
 
 func (this *RC5) Decrypt(chiperText []byte) (plainText []byte) {
-
 	for i := 0; i < len(chiperText); i += 8 {
 		plainText = append(plainText, this.DecryptBlock(chiperText[i:i+8])...)
 	}
-
 	return
 }
