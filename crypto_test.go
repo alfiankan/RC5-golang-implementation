@@ -29,6 +29,7 @@ func TestRC5Encrypt(t *testing.T) {
 	cobaRC5 := rc5.NewRC532(&rc5.RC5SimpleConfig{
 		Key:   []byte("CryptoClassUMS2022"),
 		Round: 12,
+		Debug: true,
 	})
 
 	chiper2 := cobaRC5.Encrypt([]byte("Happy New Year Eve 2023"))
@@ -55,6 +56,7 @@ func TestRC5Decrypt(t *testing.T) {
 	cobaRC5 := rc5.NewRC532(&rc5.RC5SimpleConfig{
 		Key:   []byte("CryptoClassUMS2022"),
 		Round: 12,
+		Debug: true,
 	})
 
 	byteChiper, err := base64.StdEncoding.DecodeString("a2ORTDmgFTMVXiziosxt+IxH1SNFqriEVFV+5kFLuKI=")
